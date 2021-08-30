@@ -1,0 +1,34 @@
+# for updates and superuser setup, please use:
+# docker-compose run python migrate
+# docker-compose run
+
+version: "3.4"
+services:
+
+  mqtt:
+    image: eclipse-mosquitto
+    volumes:
+      - door-commander-mosquitto-data:/mosquitto/data
+      - ./mosquitto/config/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+    ports:
+      - "127.0.0.1:8080:80" # HTTP / WS / MQTT
+
+
+  nginx:
+    build:
+      context: "nginx"
+      dockerfile: Dockerfile
+      #target: nginx
+      #args:
+      #  NGINX_VERSION: 1-alpine
+    ports:
+      - "127.0.0.1:80:80" # HTTP / WS / MQTT
+      - "127.0.0.1:443:443" # HTTPS / WS / MQTT
+      - "127.0.0.1:1883:1883" # MQTT
+      - "127.0.0.1:8883:8883" # TLS / MQTT
+    depends_on:
+      - mqtt
+
+
+volumes:
+  door-commander-mosquitto-data:
